@@ -6,6 +6,7 @@
 }
 :host {
   display: block;
+  max-width: 300px;
 }
 
 /* Disabled */
@@ -32,8 +33,8 @@
 .input__main {
   position: relative;
   display: block;
-  /* min-height: var(--input-height);
-  max-height: var(--input-height); */
+  /* min-height: var(--input-height); */
+  /* max-height: var(--input-height); */
   /* display: flex; */
   /* flex-wrap: wrap; */
   /* align-items: center; */
@@ -136,6 +137,57 @@
   padding: 4px 16px 0px 16px;
   font-size: var(--font-helper);
   color: hsl(var(--muted-foreground));
+}
+
+.file-list {
+  margin-top: 0.5rem;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.file-list__item {
+  padding: 5px;
+  word-wrap: break-word; /* Permite dividir palabras largas */
+  width: fit-content;
+}
+.file-list__name {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.file-list__name {
+  font-weight: 700;
+}
+.file-list__size {
+  font-size: var(--font-helper);
+  color: hsl(var(--muted-foreground));
+}
+.file-list__status {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  background-color: #D9F4E9;
+  padding: 3px 8px;
+  border-radius: calc(var(--radius) / 2);
+}
+.file-list__status-icon {
+  display: flex;
+  margin-right: 5px;
+  color: #0F804F;
+}
+.file-list__status-text {
+  font-size: var(--font-helper);
+}
+.file-list__delete {
+  width: 25px;
+}
+.file-list__delete--btn {
+  padding: 0px;
+  margin: 0px;
+  background-color: transparent;
+  border: none;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
 }
 
 /* Errors */
