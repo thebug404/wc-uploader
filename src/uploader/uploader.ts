@@ -30,6 +30,8 @@ function formatFileSize(bytes: number, decimals: number = 2): string {
   return `${formattedSize} ${sizes[i]}`;
 }
 
+const FIVE_MB = 1024 * 1024 * 5; // 5MB
+
 @customElement("x-uploader")
 export class XUploader extends FormControl<File[]> {
   static styles = css`${unsafeCSS(styles)}`;
@@ -53,13 +55,16 @@ export class XUploader extends FormControl<File[]> {
   multiple = false;
 
   @property()
-  accept: string | null = null;
+    accept: string | null = null;
 
-  @property({ attribute: "error-message-min" })
-  override errorMessageMin = "The minimum number of files allowed is {min}";
+  @property()
+  override max = "1";
 
   @property({ attribute: "error-message-max" })
   override errorMessageMax = "The maximum number of files allowed is {max}";
+
+  @property({ type: Number, attribute: "max-file-size" })
+    maxFileSize = FIVE_MB;
 
   protected firstUpdated(): void {
     executeWithDelay(() => this.checkValidity());
@@ -79,19 +84,8 @@ export class XUploader extends FormControl<File[]> {
   }
 
   checkValidity(): boolean {
-    console.log(this.required, this.value.length);
-
     if (this.required && this.value.length === 0) {
       this.setCustomValidity(this.errorMessageRequired);
-      return false;
-    }
-
-    if (this.min && this.value.length < Number(this.min)) {
-      console.log(this.min, this.value.length);
-
-      const message = this.errorMessageMin.replace("{min}", this.min.toString());
-      this.setCustomValidity(message);
-
       return false;
     }
 
@@ -151,6 +145,48 @@ export class XUploader extends FormControl<File[]> {
     this.markAsTouched();
   }
 
+  private onDragOver(ev: DragEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    (ev.currentTarget as HTMLElement)?.classList.add("dragover");
+  }
+
+  private onDrop(ev: DragEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    (ev.currentTarget as HTMLElement)?.classList.remove("dragover");
+
+    if (ev.type.includes("dragleave") && ev.type.includes("dragend")) {
+      return;
+    }
+
+    const files = Array.from(ev.dataTransfer?.files || [])
+      .filter((file) => file.size <= this.maxFileSize)
+      .filter((file) => {
+        if (!this.accept) {
+          return true;
+        }
+
+        const accept = this.accept.split(",").map((type) => type.trim());
+        const fileType = file.type;
+        const fileExtension = file.name.split(".").pop();
+
+        return accept.includes(fileType) || accept.includes(`.${fileExtension}`);
+      });
+
+    this.setValue(files);
+
+    const event = new CustomEvent("change", {
+      detail: { value: files },
+      bubbles: true,
+      composed: true
+    });
+
+    this.dispatchEvent(event);
+  }
+
   protected render(): unknown {
     const isError = (this.touched || this.dirty) && this.validationMessage != null;
 
@@ -165,7 +201,15 @@ export class XUploader extends FormControl<File[]> {
           })}
 
           <div class="input__container">
-            <label class="input__main" tabindex="0">
+            <label
+              class="input__main"
+              tabindex="0"
+              @drop=${this.onDrop}
+              @dragleave=${this.onDrop}
+              @dragend=${this.onDrop}
+              @dragover=${this.onDragOver}
+              @dragenter=${this.onDragOver}
+            >
               <div class="input__icon">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -186,7 +230,9 @@ export class XUploader extends FormControl<File[]> {
 
               <div class="input__text">
                 <p class="input__text-primary">Arrastrar y soltar archivos aquí</p>
-                <p class="input__text-secondary">Cantidad de archivos y peso máximo</p>
+                <p class="input__text-secondary">
+                   Hasta ${when(Number(this.max) > 1, () => `${this.max} archivos`, () => "1 archivo")} y máx ${formatFileSize(Number(this.maxFileSize))}
+                </p>
               </div>
 
               <div class="input__divider"></div>
@@ -214,7 +260,7 @@ export class XUploader extends FormControl<File[]> {
         ${when(this.hint || isError, () => {
             return html`
               <p class="input__message">
-                ${isError ? this.validationMessage : this.hint}
+                ${isError ? this.validationMessage : this.hint?.replace("{accept}", this.accept || "")}
               </p>
             `;
           })}

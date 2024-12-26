@@ -53,6 +53,10 @@
   outline-width: var(--border-width);
   outline-style: solid;
 }
+.input__main.dragover {
+  border-color: hsl(var(--primary));
+  background-color: hsl(var(--primary) / 0.05);
+}
 .input__icon {
   color: hsl(var(--primary));
   margin-right: 8px;
