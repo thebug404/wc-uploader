@@ -52,6 +52,9 @@ export class XUploader extends FormControl<File[]> {
   @property({ type: Boolean })
   multiple = false;
 
+  @property()
+  accept: string | null = null;
+
   @property({ attribute: "error-message-min" })
   override errorMessageMin = "The minimum number of files allowed is {min}";
 
@@ -202,6 +205,7 @@ export class XUploader extends FormControl<File[]> {
                 ?multiple=${this.multiple}
                 @input=${this._onInput}
                 @blur=${this._onBlur}
+                accept=${this.accept}
               />
             </label>
           </div>
