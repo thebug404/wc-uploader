@@ -211,25 +211,53 @@ export class XUploader extends FormControl<File[]> {
               @dragenter=${this.onDragOver}
             >
               <div class="input__icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="45"
-                  height="45"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="lucide lucide-folder-closed"
-                >
-                  <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
-                  <path d="M2 10h20"/>
-                </svg>
+                ${
+                  when(
+                    this.value.length > 0,
+                    () => html`
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="45"
+                        height="45"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        class="icon icon-tabler icons-tabler-filled icon-tabler-folder"
+                      >
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M9 3a1 1 0 0 1 .608 .206l.1 .087l2.706 2.707h6.586a3 3 0 0 1 2.995 2.824l.005 .176v8a3 3 0 0 1 -2.824 2.995l-.176 .005h-14a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-11a3 3 0 0 1 2.824 -2.995l.176 -.005h4z" />
+                      </svg>
+                    `,
+                    () => html`
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="45"
+                        height="45"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-folder-closed"
+                      >
+                        <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+                        <path d="M2 10h20"/>
+                      </svg>
+                    `
+                  )
+                }
               </div>
 
               <div class="input__text">
-                <p class="input__text-primary">Arrastrar y soltar archivos aquí</p>
+                <p class="input__text-primary">
+                  ${
+                    when(
+                      this.value.length > 0,
+                      () => "Archivos cargados",
+                      () => "Arrastrar y soltar archivos aquí"
+                    )
+                  }
+                </p>
                 <p class="input__text-secondary">
                    Hasta ${when(Number(this.max) > 1, () => `${this.max} archivos`, () => "1 archivo")} y máx ${formatFileSize(Number(this.maxFileSize))}
                 </p>
@@ -238,8 +266,16 @@ export class XUploader extends FormControl<File[]> {
               <div class="input__divider"></div>
 
               <div class="input__action">
-                <span class="input__action-text">o bien</span>
-                <a href="#" class="input__action-link">Buscar archivos</a>
+                <span class="input__action-text">
+                  ${
+                    when(
+                      this.value.length > 0,
+                      () => "¿Quieres agregar más?",
+                      () => "o bien"
+                    )
+                  }
+                </span>
+                <span class="input__action-link">Buscar archivos</span>
               </div>
 
               <input

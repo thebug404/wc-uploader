@@ -83,6 +83,7 @@
 .input__action-link {
   color: hsl(var(--primary));
   cursor: pointer;
+  text-decoration: underline;
 }
 .input__field {
   flex: 1;
