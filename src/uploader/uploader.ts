@@ -66,6 +66,18 @@ export class XUploader extends FormControl<File[]> {
   @property({ type: Number, attribute: "max-file-size" })
     maxFileSize = FIVE_MB;
 
+  connectedCallback(): void {
+    super.connectedCallback();
+
+    this.form?.addEventListener("reset", this.reset.bind(this));
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+
+    this.form?.removeEventListener("reset", this.reset.bind(this));
+  }
+
   protected firstUpdated(): void {
     executeWithDelay(() => this.checkValidity());
   }
