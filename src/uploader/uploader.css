@@ -154,9 +154,8 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-}
-.file-list__name {
   font-weight: 700;
+  color: hsl(var(--card-foreground));
 }
 .file-list__size {
   font-size: var(--font-helper);
