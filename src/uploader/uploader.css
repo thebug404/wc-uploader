@@ -150,6 +150,12 @@
   table-layout: fixed;
   border-collapse: collapse;
 }
+.file-list__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px;
+}
 .file-list__item {
   padding: 5px;
   word-wrap: break-word; /* Permite dividir palabras largas */
@@ -170,20 +176,27 @@
   display: flex;
   align-items: center;
   width: fit-content;
-  background-color: #D9F4E9;
   padding: 3px 8px;
   border-radius: calc(var(--radius) / 2);
+}
+.file-list__status--success {
+  background-color: #D9F4E9;
+}
+.file-list__status--error {
+  background-color: #FDE8E8;
 }
 .file-list__status-icon {
   display: flex;
   margin-right: 5px;
+}
+.file-list__status--success .file-list__status-icon {
   color: #0F804F;
+}
+.file-list__status--error .file-list__status-icon {
+  color: #C53030;
 }
 .file-list__status-text {
   font-size: var(--font-helper);
-}
-.file-list__delete {
-  width: 25px;
 }
 .file-list__delete--btn {
   padding: 0px;

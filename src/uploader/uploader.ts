@@ -43,16 +43,16 @@ export class XUploader extends FormControl<File[]> {
   override value: File[] = [];
 
   @property()
-  label: string | null = null;
+    label: string | null = null;
 
   @property()
-  placeholder: string | null = null;
+    placeholder: string | null = null;
 
   @property()
-  hint: string | null = null;
+    hint: string | null = null;
 
   @property({ type: Boolean })
-  multiple = false;
+    multiple = false;
 
   @property()
     accept: string | null = null;
@@ -65,6 +65,9 @@ export class XUploader extends FormControl<File[]> {
 
   @property({ type: Number, attribute: "max-file-size" })
     maxFileSize = FIVE_MB;
+
+  @property({ attribute: "error-message-max-file-size" })
+    errorMessageMaxFileSize = "The file size exceeds the {maxFileSize} limit";
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -103,6 +106,13 @@ export class XUploader extends FormControl<File[]> {
 
     if (this.max && this.value.length > Number(this.max)) {
       const message = this.errorMessageMax.replace("{max}", this.max.toString());
+      this.setCustomValidity(message);
+
+      return false;
+    }
+
+    if (this.value.some((file) => file.size > this.maxFileSize)) {
+      const message = this.errorMessageMaxFileSize.replace("{maxFileSize}", formatFileSize(this.maxFileSize));
       this.setCustomValidity(message);
 
       return false;
@@ -157,6 +167,19 @@ export class XUploader extends FormControl<File[]> {
     this.markAsTouched();
   }
 
+  private onRemoveFile(file: File): void {
+    const files = this.value.filter((f) => f !== file);
+    this.setValue(files);
+
+    const event = new CustomEvent("change", {
+      detail: { value: files },
+      bubbles: true,
+      composed: true
+    });
+
+    this.dispatchEvent(event);
+  }
+
   private onDragOver(ev: DragEvent): void {
     ev.preventDefault();
     ev.stopPropagation();
@@ -175,7 +198,6 @@ export class XUploader extends FormControl<File[]> {
     }
 
     const files = Array.from(ev.dataTransfer?.files || [])
-      .filter((file) => file.size <= this.maxFileSize)
       .filter((file) => {
         if (!this.accept) {
           return true;
@@ -317,7 +339,7 @@ export class XUploader extends FormControl<File[]> {
             <tbody>
               ${this.value.map((file) => {
                 return html`
-                  <tr>
+                  <tr class="file-list__row">
                     <td class="file-list__item file-list__name">
                       ${file.name}
                     </td>
@@ -325,21 +347,65 @@ export class XUploader extends FormControl<File[]> {
                       ${formatFileSize(file.size)}
                     </td>
                     <td class="file-list__item">
-                      <span class="file-list__status">
+                      <span class="file-list__status ${file.size > this.maxFileSize ? "file-list__status--error" : "file-list__status--success"}">
                         <span class="file-list__status-icon">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                          ${
+                            when(
+                              file.size > this.maxFileSize,
+                              () => html`
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  class="lucide lucide-circle-alert"
+                                >
+                                  <circle cx="12" cy="12" r="10"/>
+                                  <line x1="12" x2="12" y1="8" y2="12"/>
+                                  <line x1="12" x2="12.01" y1="16" y2="16"/>
+                                </svg>
+                              `,
+                              () => html`
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  class="lucide lucide-circle-check"
+                                >
+                                  <circle cx="12" cy="12" r="10"/>
+                                  <path d="m9 12 2 2 4-4"/>
+                                </svg>
+                              `
+                            )
+                          }
                         </span>
-                        <span class="file-list__status-text">Listo</span>
+                        <span class="file-list__status-text">
+                          ${
+                            when(
+                              file.size > this.maxFileSize,
+                              () => "Fallido",
+                              () => "Listo"
+                            )
+                          }
+                        </span>
                       </span>
                     </td>
                     <td class="file-list__item file-list__delete">
                       <button
                         class="file-list__delete--btn"
                         aria-label="Eliminar archivo"
-                        @click=${() => {
-                          const files = this.value.filter((f) => f !== file);
-                          this.setValue(files);
-                        }}
+                        @click=${() => this.onRemoveFile(file)}
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
