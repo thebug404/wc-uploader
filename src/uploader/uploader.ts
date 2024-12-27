@@ -14,15 +14,28 @@ declare global {
 }
 
 /**
- * Convierte un tamaño en bytes a un formato legible.
- * @param bytes - El tamaño en bytes.
- * @param decimals - Número de decimales a mostrar (opcional, por defecto es 2).
- * @returns Una cadena con el tamaño formateado.
+ * Formats a file size in bytes into a human-readable string with appropriate units.
+ *
+ * @param {number} bytes - The file size in bytes.
+ * @param {number} [decimals=2] - The number of decimal places to include in the formatted size.
+ * @returns {string} A human-readable string representing the file size, such as "1.50 MB".
+ *
+ * @example
+ * // Returns "1.50 MB"
+ * formatFileSize(1572864, 2);
+ *
+ * @example
+ * // Returns "1.5 MB"
+ * formatFileSize(1572864, 1);
+ *
+ * @example
+ * // Returns "0 Bytes"
+ * formatFileSize(0);
  */
 function formatFileSize(bytes: number, decimals: number = 2): string {
   if (bytes === 0) return "0 Bytes";
 
-  const k = 1024; // Tamaño base para conversión
+  const k = 1024; // Base size for conversion
   const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   const formattedSize = (bytes / Math.pow(k, i)).toFixed(decimals);
@@ -32,6 +45,36 @@ function formatFileSize(bytes: number, decimals: number = 2): string {
 
 const FIVE_MB = 1024 * 1024 * 5; // 5MB
 
+/**
+ * A `XUploader` is a component used to upload files. It allows users to select
+ * files from their device or drag and drop files onto the component.
+ * 
+ * @example
+ * ```html
+ * <x-uploader
+ *  name="files"
+ *  label="Upload files"
+ *  accept=".pdf, .doc, .docx"
+ *  max="5"
+ *  max-file-size="1048576"
+ *  required
+ *  error-message-required="Please upload a file"
+ *  error-message-max="The maximum number of files allowed is {max}"
+ *  error-message-max-file-size="The file size exceeds the {maxFileSize} limit">
+ * </x-uploader>
+ * ```
+ * 
+ * @example
+ * ```ts
+ * const $uploader = document.querySelector("x-uploader");
+ * 
+ * $uploader.addEventListener("change", (event) => {
+ *  const files = $uploader.value;
+ * 
+ *  console.log(files);
+ * });
+ * ```
+ */
 @customElement("x-uploader")
 export class XUploader extends FormControl<File[]> {
   static styles = css`${unsafeCSS(styles)}`;
@@ -39,21 +82,49 @@ export class XUploader extends FormControl<File[]> {
   @query(".input__field")
   private _input!: HTMLInputElement;
 
+  /**
+   * Represents the list of files selected by the user.
+   * @type {File[]}
+   * @default []
+   */
   @property()
   override value: File[] = [];
 
+  /**
+   * The label displayed for the file input.
+   * 
+   * @type {string | null}
+   * @default null
+   */
   @property()
     label: string | null = null;
 
-  @property()
-    placeholder: string | null = null;
-
+  /**
+   * Hint text to provide additional guidance to the user.
+   * The placeholder `{accept}` will be replaced with the value of the `accept` property.
+   * 
+   * @type {string | null}
+   * @default null
+   */
   @property()
     hint: string | null = null;
 
+  /**
+   * Specifies whether multiple files can be selected.
+   * 
+   * @type {boolean}
+   * @default false
+   */
   @property({ type: Boolean })
     multiple = false;
 
+  /**
+   * The types of files accepted by the file input, specified as a comma-separated string.
+   * For example, ".png, .jpg, .jpeg".
+   * 
+   * @type {string | null}
+   * @default null
+   */
   @property()
     accept: string | null = null;
 
@@ -63,11 +134,24 @@ export class XUploader extends FormControl<File[]> {
   @property({ attribute: "error-message-max" })
   override errorMessageMax = "The maximum number of files allowed is {max}";
 
+  /**
+   * The maximum file size allowed, in bytes. The default value is 5MB.
+   * 
+   * @type {number}
+   * @default 5242880
+   */
   @property({ type: Number, attribute: "max-file-size" })
-    maxFileSize = FIVE_MB;
+    maxFileSize: number = FIVE_MB;
 
+  /**
+   * Error message displayed when a file exceeds the maximum file size.
+   * The placeholder `{maxFileSize}` will be replaced with the value of the `maxFileSize` property.
+   * 
+   * @type {string}
+   * @default "The file size exceeds the {maxFileSize} limit"
+   */
   @property({ attribute: "error-message-max-file-size" })
-    errorMessageMaxFileSize = "The file size exceeds the {maxFileSize} limit";
+    errorMessageMaxFileSize: string = "The file size exceeds the {maxFileSize} limit";
 
   connectedCallback(): void {
     super.connectedCallback();
