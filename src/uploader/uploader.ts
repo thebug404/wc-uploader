@@ -116,7 +116,7 @@ export class XUploader extends FormControl<File[]> {
    * @default false
    */
   @property({ type: Boolean })
-    multiple = false;
+    multiple: boolean = false;
 
   /**
    * The types of files accepted by the file input, specified as a comma-separated string.
@@ -320,7 +320,7 @@ export class XUploader extends FormControl<File[]> {
 
           <div class="input__container">
             <label
-              class="input__main"
+              class="input__main ${this.value.length > 0 ? "input__main--filled" : ""}"
               tabindex="0"
               @drop=${this.onDrop}
               @dragleave=${this.onDrop}
